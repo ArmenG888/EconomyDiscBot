@@ -1,5 +1,5 @@
 import discord,sqlite3,datetime,random,time
-
+from discord.ui import Button
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -49,6 +49,17 @@ class main:
     
 m = main()
 
+class Buttons(discord.ui.View):
+    def __init__(self, inv:str):
+        super().__init__()
+        self.inv = inv
+        self.add_item(discord.ui.Button(label="Click Me!", style=discord.ButtonStyle.primary, custom_id="test"))
+
+    @discord.ui.button(label='Click Me!', style=discord.ButtonStyle.primary, custom_id="test")
+    async def test(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message('Button clicked!', ephemeral=True)
+
+
 def send_embed(title, description, color=0x00FF00):
     embed = discord.Embed(title=title, description=description)
     embed.color = color
@@ -97,37 +108,41 @@ async def crime(message, id, name, *args):
     else:
         await message.channel.send(embed=send_embed("Crime", f"> You {crime_mes} and earned :coin: {money}"))
 
-
-
 time_formats = {
-    'relative': 'R',
+    'relative': 'r',
     'short': 't',
-    'long': 'F',
+    'long': 'f',
 }
 
 async def time_with_timezone(message,id,name, *args):
-    
+    def time_format(format_argument):
+        if format_argument not in time_formats:
+            format = format_argument
+        else:
+            format = time_formats[format_argument]
+        if format == "":
+            format = "F"
+        return format
     date_time = datetime.datetime.now()
     arguments = message.content.split(" ")
     mes = message.content.replace("!time ","")
     format = "F"
     if len(arguments) > 2:
-        format = time_formats[mes.split(":")[1].split(" ")[1].lower()]
-        if format == "":
-            format = "F"
+        format = time_format(mes.split(":")[1].split(" ")[1].lower())
+        
     if len(arguments) > 1:
         
-        hour = int(mes.split(":")[0])
-        if "PM" in name or "pm" in name:
-            hour = int(mes.split(":")[0])+12
-        mes = mes.replace("pm", "").replace("PM", "").replace("am", "").replace("AM", "")
-        date_time = date_time.replace(hour=hour, minute=int(mes.split(":")[1].split(" ")[0]))
-    
+        try:
+            hour = int(mes.split(":")[0])
+            if "PM" in name or "pm" in name:
+                hour = int(mes.split(":")[0])+12
+            mes = mes.replace("pm", "").replace("PM", "").replace("am", "").replace("AM", "")
+            date_time = date_time.replace(hour=hour, minute=int(mes.split(":")[1].split(" ")[0]))
+        except:
+            format = time_format(mes)
+
     target_unix_timestamp = time.mktime(date_time.timetuple())
-    if format == "F" and len(arguments) > 1:
-        await message.channel.send(embed=send_embed("Time", f"> <t:{int(target_unix_timestamp)}:{format}><t:{int(target_unix_timestamp)}:R>", 0x0000FF))
-    else:
-        await message.channel.send(embed=send_embed("Time", f"> <t:{int(target_unix_timestamp)}:{format}>", 0x0000FF))
+    await message.channel.send(embed=send_embed("Time", f"> <t:{int(target_unix_timestamp)}:{format}>", 0x0000FF))
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
