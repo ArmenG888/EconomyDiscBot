@@ -143,6 +143,26 @@ async def time_with_timezone(message,id,name, *args):
 
     target_unix_timestamp = time.mktime(date_time.timetuple())
     await message.channel.send(embed=send_embed("Time", f"> <t:{int(target_unix_timestamp)}:{format}>", 0x0000FF))
+
+async def random_number(message, id, name, *args):
+    args = message.content.split(" ")
+    if len(args) > 1:
+        if args[1] == "yn":
+            num = random.randint(0,1)
+            if num == 0:
+                num = "No"
+            else:
+                num = "Yes"
+        else:
+            nums = args[1].split(",")
+            if len(nums) > 1:
+                num = random.randint(int(nums[0]),int(nums[1]))
+            else:
+                num = random.randint(int(args[1]))
+    else:
+        num = random.randint(0,100)
+    
+    await message.channel.send(embed=send_embed("Random", f"> {num}", 0x0000FF))
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
@@ -213,6 +233,7 @@ commands = {
     '!rob':rob,
     '!crime':crime,
     '!time':time_with_timezone,
+    '!random':random_number,
 }
 
 @client.event
