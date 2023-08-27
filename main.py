@@ -69,20 +69,25 @@ async def set_money(message, id, name, *args):
     if args[0] == True:
         money = m.set_money(id, message.content.split(" ")[2])
         await message.channel.send(embed=send_embed("Money Set", f"> {name} now has :coin: {money}"))
+
 async def add_money(message, id, name, *args):
     if args[0] == True:
         money = m.add_money(id, message.content.split(" ")[2])
         await message.channel.send(embed=send_embed("Money Added", f"> {name} now has :coin: {money}"))
+
 async def bal(message, id, name, *args):
     money = m.get_money(id)
     await message.channel.send(embed=send_embed("Balance", f"> {name} has :coin: {money}", 0x0000FF))
+
 async def help(message, *args):
     await message.channel.send(embed=send_embed("Help", help_text, 0x0000FF))
+    
 async def work(message, id, name, *args):
     job = jobs[random.randint(0,len(jobs)-1)]
     money = random.randint(1,100)
     m.add_money(id, money)
     await message.channel.send(embed=send_embed("Work", f"> You worked as an {job} and made :coin: {money}"))   
+
 async def rob(message, id, name, *args):
     if name == message.author.name:
         await message.channel.send(embed=send_embed("Rob", "> You cannot rob yourself", 0xFF0000))
@@ -99,6 +104,7 @@ async def rob(message, id, name, *args):
     else:
         await message.channel.send(embed=send_embed("Rob", f"> {message.author.name} has robbed {name} and earned :coin: 10"))
     return
+
 async def crime(message, id, name, *args):
     crime_mes = crimes[random.randint(0,len(jobs)-1)]
     money = random.randint(-200,200)
@@ -158,7 +164,7 @@ async def random_number(message, id, name, *args):
             if len(nums) > 1:
                 num = random.randint(int(nums[0]),int(nums[1]))
             else:
-                num = random.randint(int(args[1]))
+                num = random.randint(0,int(args[1]))
     else:
         num = random.randint(0,100)
     
@@ -168,11 +174,12 @@ help_text = """
 > - ``!work`` - Work and earn money
 > - ``!rob <user>`` - Rob someone and earn money (or lose money)
 > - ``!time <hour>:<minute> (optional) <format> (optional)`` - Get the time in a timezone
-> EX: !time 12:00PM short
-> EX: !time
+> - Time formats: ``relative``, ``short``, ``long`` or ``f`` for full, ``r`` for relative, ``t`` for short
+> - EX: !time 12:00PM short, !time short, !time 12:00PM, !time 12:00PM r
 > - ``!crime`` - Do a crime and earn money (or lose money)
-
-
+> - ``!random <min>,<max>`` - Get a random number between min and max if no arguments then get a random number between 0 and 100
+> - ``!random <max>`` - Get a random number between 0 and max
+> - ``!random yn`` - Get a random yes or no
 """
 jobs = [
     'Programmer',
@@ -222,7 +229,7 @@ crimes = [
 ]
 admins = [
     '.armeng'
-]
+] # list of admins
 
 commands = {
     '!set_money':set_money,
@@ -275,7 +282,11 @@ async def on_message(message):
 
     command = message.content.split(" ")[0]
     if command in commands:
-        await commands[command](message, id, name(), admin)
+        try:
+            await commands[command](message, id, name(), admin)
+        except Exception as e:
+            print(e)
+            await message.channel.send(embed=send_embed("Error", "Invalid Command usage, ``!help`` for help"))
     else:
         await message.channel.send(embed=send_embed("Error", "Invalid Command use ``!help`` for help"))
      
