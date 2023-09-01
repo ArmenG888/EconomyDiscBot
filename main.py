@@ -1,5 +1,7 @@
 import discord,sqlite3,datetime,random,time
 from discord.ui import Button
+import yfinance as yf
+
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -46,7 +48,44 @@ class main:
         self.cur.execute("UPDATE main_user SET xp = ? WHERE id = ?", (xp, id))
         self.con.commit()
         return xp
-    
+    def get_stock_by_name(self, stock):
+        self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (stock))
+        id = self.cur.fetchone()[0]
+        return id
+    def get_stock_by_id(self, id):
+        self.cur.execute("SELECT name FROM main_stock WHERE id = ?", (id))
+        name = self.cur.fetchone()[0]
+        return name
+    def get_stock_price(self, id):
+        self.cur.execute("SELECT price FROM main_stock WHERE id = ?", (id))
+        price = self.cur.fetchone()[0]
+        return price
+    def get_user_stock(self,user_id,stock_id):
+        self.cur.execute("SELECT amount FROM main_user_stock WHERE user_id = ? AND stock_id = ?", (user_id,stock_id))
+        amount = self.cur.fetchone()[0]
+        return amount
+    def set_user_stock(self,user_id,stock_id,amount):
+        self.cur.execute("UPDATE main_user_stock SET amount = ? WHERE user_id = ? AND stock_id = ?", (amount,user_id,stock_id))
+        self.con.commit()
+        return amount
+    def add_user_stock(self,user_id,stock_id,amount):
+        user_stock = int(self.get_user_stock(user_id,stock_id))
+        new_amount = user_stock + int(amount)
+        self.cur.execute("UPDATE main_user_stock SET amount = ? WHERE user_id = ? AND stock_id = ?", (new_amount,user_id,stock_id))
+        self.con.commit()
+        return new_amount
+    def create_stock(self,name,price):
+        self.cur.execute("INSERT INTO main_stock (name, price) VALUES (?, ?)", (name, price))
+        self.con.commit()
+        self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (name,))
+        id = self.cur.fetchone()[0]
+        return id
+    def set_stock_price(self,id,price):
+        self.cur.execute("UPDATE main_stock SET price = ? WHERE id = ?", (price,id))
+        self.con.commit()
+        
+
+
 m = main()
 
 class Buttons(discord.ui.View):
