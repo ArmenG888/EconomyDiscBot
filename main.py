@@ -49,15 +49,15 @@ class main:
         self.con.commit()
         return xp
     def get_stock_by_name(self, stock):
-        self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (stock))
-        id = self.cur.fetchone()[0]
+        self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (stock,))
+        id = self.cur.fetchone()
         if id is None:
             self.cur.execute("INSERT INTO main_stock (name, price) VALUES (?, ?)", (stock, 0.00))
             self.con.commit()
             self.cur.execute("SELECT id FROM main_user WHERE name = ?", (stock,))
-            id = self.cur.fetchone()[0]
+            id = self.cur.fetchone()
         print(id)
-        return id
+        return id[0]
 
     def get_stock_by_id(self, id):
         self.cur.execute("SELECT name FROM main_stock WHERE id = ?", (id))
@@ -171,11 +171,12 @@ stocks = {
 def get_stock_price():
     for stock in stocks:
         
-        s = yf.Ticker(stocks[stock])
+        stock = yf.Ticker(stocks[stock])
+        dataX = stock.history(period='1d')
+        price = round(dataX['Open'].tail(1).iloc[0],2)
         print(stock)
         id = m.get_stock_by_name(stock)
-        
-        m.set_stock_price(id, s.info['regularMarketPrice'])
+        m.set_stock_price(id, price)
 
 time_formats = {
     'relative': 'r',
