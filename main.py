@@ -51,7 +51,14 @@ class main:
     def get_stock_by_name(self, stock):
         self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (stock))
         id = self.cur.fetchone()[0]
+        if id is None:
+            self.cur.execute("INSERT INTO main_stock (name, price) VALUES (?, ?)", (stock, 0.00))
+            self.con.commit()
+            self.cur.execute("SELECT id FROM main_user WHERE name = ?", (stock,))
+            id = self.cur.fetchone()[0]
+        print(id)
         return id
+
     def get_stock_by_id(self, id):
         self.cur.execute("SELECT name FROM main_stock WHERE id = ?", (id))
         name = self.cur.fetchone()[0]
@@ -152,6 +159,23 @@ async def crime(message, id, name, *args):
         await message.channel.send(embed=send_embed("Crime", f"> You {crime_mes} and got caught -:coin: {abs(money)}", 0xFF0000))
     else:
         await message.channel.send(embed=send_embed("Crime", f"> You {crime_mes} and earned :coin: {money}"))
+
+stocks = {
+    'apple': 'AAPL',
+    'microsoft': 'MSFT',
+    'google': 'GOOG',
+    'amazon': 'AMZN',
+    'facebook': 'FB',
+}
+
+def get_stock_price():
+    for stock in stocks:
+        
+        s = yf.Ticker(stocks[stock])
+        print(stock)
+        id = m.get_stock_by_name(stock)
+        
+        m.set_stock_price(id, s.info['regularMarketPrice'])
 
 time_formats = {
     'relative': 'r',
@@ -302,6 +326,7 @@ levels = {
 
 @client.event
 async def on_message(message):
+    get_stock_price()
     if message.author == client.user: # if the message is from the bot then return
         return 
    
