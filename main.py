@@ -54,9 +54,9 @@ class main:
         if id is None:
             self.cur.execute("INSERT INTO main_stock (name, price) VALUES (?, ?)", (stock, 0.00))
             self.con.commit()
-            self.cur.execute("SELECT id FROM main_user WHERE name = ?", (stock,))
+            self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (stock,))
             id = self.cur.fetchone()
-        print(id)
+            print(id)
         return id[0]
 
     def get_stock_by_id(self, id):
@@ -81,12 +81,7 @@ class main:
         self.cur.execute("UPDATE main_user_stock SET amount = ? WHERE user_id = ? AND stock_id = ?", (new_amount,user_id,stock_id))
         self.con.commit()
         return new_amount
-    def create_stock(self,name,price):
-        self.cur.execute("INSERT INTO main_stock (name, price) VALUES (?, ?)", (name, price))
-        self.con.commit()
-        self.cur.execute("SELECT id FROM main_stock WHERE name = ?", (name,))
-        id = self.cur.fetchone()[0]
-        return id
+    
     def set_stock_price(self,id,price):
         self.cur.execute("UPDATE main_stock SET price = ? WHERE id = ?", (price,id))
         self.con.commit()
@@ -165,18 +160,9 @@ stocks = {
     'microsoft': 'MSFT',
     'google': 'GOOG',
     'amazon': 'AMZN',
-    'facebook': 'FB',
 }
 
-def get_stock_price():
-    for stock in stocks:
-        
-        stock = yf.Ticker(stocks[stock])
-        dataX = stock.history(period='1d')
-        price = round(dataX['Open'].tail(1).iloc[0],2)
-        print(stock)
-        id = m.get_stock_by_name(stock)
-        m.set_stock_price(id, price)
+
 
 time_formats = {
     'relative': 'r',
@@ -233,13 +219,32 @@ async def random_number(message, id, name, *args):
         num = random.randint(0,100)
     
     await message.channel.send(embed=send_embed("Random", f"> {num}", 0x0000FF))
+
+
+async def stock_market(message, id, name, *args):
+    mes = ""
+    for stock in stocks:
+        stockX = yf.Ticker(stocks[stock])
+        dataX = stockX.history(period='1d')
+        price = round(dataX['Open'].tail(1).iloc[0],2)
+        print(stock)
+        id = m.get_stock_by_name(stock)
+        m.set_stock_price(id, price)
+        mes += f"> :coin: {round(price,2)} ``{stock.capitalize()}``\n" 
+        
+    await message.channel.send(embed=send_embed("Stocks", mes, 0x0000FF))
+
+
+async def buy_stock(message, id, name, *args):
+    
+
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
 > - ``!rob <user>`` - Rob someone and earn money (or lose money)
 > - ``!time <hour>:<minute> (optional) <format> (optional)`` - Get the time in a timezone
 > - Time formats: ``relative``, ``short``, ``long`` or ``f`` for full, ``r`` for relative, ``t`` for short
-> - EX: !time 12:00PM short, !time short, !time 12:00PM, !time 12:00PM r
+> - EX: !time 12:00PM short, P!time short, !time 12:00PM, !time 12:00PM r
 > - ``!crime`` - Do a crime and earn money (or lose money)
 > - ``!random <min>,<max>`` - Get a random number between min and max if no arguments then get a random number between 0 and 100
 > - ``!random <max>`` - Get a random number between 0 and max
@@ -305,6 +310,7 @@ commands = {
     '!crime':crime,
     '!time':time_with_timezone,
     '!random':random_number,
+    '!stocks':stock_market,
 }
 
 @client.event
@@ -327,7 +333,6 @@ levels = {
 
 @client.event
 async def on_message(message):
-    get_stock_price()
     if message.author == client.user: # if the message is from the bot then return
         return 
    
