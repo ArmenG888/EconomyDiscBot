@@ -68,17 +68,22 @@ class main:
         price = self.cur.fetchone()[0]
         return price
     def get_user_stock(self,user_id,stock_id):
-        self.cur.execute("SELECT amount FROM main_user_stock WHERE user_id = ? AND stock_id = ?", (user_id,stock_id))
-        amount = self.cur.fetchone()[0]
-        return amount
+        self.cur.execute("SELECT amount FROM main_user_stocks WHERE user_id = ? AND stock_id = ?", (user_id,stock_id))
+        amount = self.cur.fetchone()
+        if amount is None:
+            self.cur.execute("INSERT INTO main_user_stocks (user_id, stock_id, amount) VALUES (?, ?, ?)", (user_id,stock_id,0))
+            self.con.commit()
+            self.cur.execute("SELECT amount FROM main_user_stocks WHERE user_id = ? AND stock_id = ?", (user_id,stock_id))
+            amount = self.cur.fetchone()
+        return amount[0]
     def set_user_stock(self,user_id,stock_id,amount):
-        self.cur.execute("UPDATE main_user_stock SET amount = ? WHERE user_id = ? AND stock_id = ?", (amount,user_id,stock_id))
+        self.cur.execute("UPDATE main_user_stocks SET amount = ? WHERE user_id = ? AND stock_id = ?", (amount,user_id,stock_id))
         self.con.commit()
         return amount
     def add_user_stock(self,user_id,stock_id,amount):
         user_stock = int(self.get_user_stock(user_id,stock_id))
         new_amount = user_stock + int(amount)
-        self.cur.execute("UPDATE main_user_stock SET amount = ? WHERE user_id = ? AND stock_id = ?", (new_amount,user_id,stock_id))
+        self.cur.execute("UPDATE main_user_stocks SET amount = ? WHERE user_id = ? AND stock_id = ?", (new_amount,user_id,stock_id))
         self.con.commit()
         return new_amount
     
@@ -118,7 +123,18 @@ async def add_money(message, id, name, *args):
 
 async def bal(message, id, name, *args):
     money = m.get_money(id)
-    await message.channel.send(embed=send_embed("Balance", f"> {name} has :coin: {money}", 0x0000FF))
+    mesg = f"> :coin: {money} ``Balance``\n\n**Stocks**\n"
+    
+    user_stocks = {}
+    for i in stocks:
+        stock_id = m.get_stock_by_name(i)
+        amount = m.get_user_stock(id, stock_id)
+        mesg += f"> :coin: {amount} ``{i.capitalize()}``\n"
+        user_stocks[i] = amount
+
+
+    await message.channel.send(embed=send_embed(f"Balance {name}", mesg, 0x0000FF))
+
 
 async def help(message, *args):
     await message.channel.send(embed=send_embed("Help", help_text, 0x0000FF))
@@ -235,8 +251,8 @@ async def stock_market(message, id, name, *args):
     await message.channel.send(embed=send_embed("Stocks", mes, 0x0000FF))
 
 
-async def buy_stock(message, id, name, *args):
-    
+#async def buy_stock(message, id, name, *args):
+
 
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
