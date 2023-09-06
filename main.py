@@ -135,6 +135,16 @@ async def bal(message, id, name, *args):
 
     await message.channel.send(embed=send_embed(f"Balance {name}", mesg, 0x0000FF))
 
+async def steam_market_fee(message, id, name, *args):
+    price = float(message.content.split(" ")[1])
+    if price > 0.10:
+        price *= 1.15
+    else:
+        price += 0.02
+
+    await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
+
+
 
 async def help(message, *args):
     await message.channel.send(embed=send_embed("Help", help_text, 0x0000FF))
@@ -327,6 +337,7 @@ commands = {
     '!time':time_with_timezone,
     '!random':random_number,
     '!stocks':stock_market,
+    '!steam_fee':steam_market_fee
 }
 
 @client.event
