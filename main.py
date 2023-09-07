@@ -1,4 +1,4 @@
-import discord,sqlite3,datetime,random,time
+import discord,sqlite3,datetime,random,time,math
 from discord.ui import Button
 import yfinance as yf
 
@@ -144,6 +144,14 @@ async def steam_market_fee(message, id, name, *args):
 
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
+async def logarithm(message, id, name, *args):
+    logarithm = message.content.split(" ")[1]
+    logarithm = logarithm.replace(" ", "")
+    base = float(logarithm.split("log")[0].split("(")[0])
+    inside = float(logarithm.split("(")[1].replace(")",""))
+    print(base, inside)
+    await message.channel.send(embed=send_embed(f"Logarithm", f"{math.log(inside)/math.log(base)}", 0x0000FF))
+    
 
 
 async def help(message, *args):
@@ -337,7 +345,8 @@ commands = {
     '!time':time_with_timezone,
     '!random':random_number,
     '!stocks':stock_market,
-    '!steam_fee':steam_market_fee
+    '!steam_fee':steam_market_fee,
+    '!log':logarithm
 }
 
 @client.event
