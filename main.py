@@ -60,11 +60,11 @@ class main:
         return id[0]
 
     def get_stock_by_id(self, id):
-        self.cur.execute("SELECT name FROM main_stock WHERE id = ?", (id))
+        self.cur.execute("SELECT name FROM main_stock WHERE id = ?", (id,))
         name = self.cur.fetchone()[0]
         return name
     def get_stock_price(self, id):
-        self.cur.execute("SELECT price FROM main_stock WHERE id = ?", (id))
+        self.cur.execute("SELECT price FROM main_stock WHERE id = ?", (id,))
         price = self.cur.fetchone()[0]
         return price
     def get_user_stock(self,user_id,stock_id):
@@ -269,7 +269,25 @@ async def stock_market(message, id, name, *args):
     await message.channel.send(embed=send_embed("Stocks", mes, 0x0000FF))
 
 
-#async def buy_stock(message, id, name, *args):
+async def buy_stock(message, id, name, *args):
+    mes = message.content.replace("!buy ", "")
+    stock = mes.split(" ")[0]
+    amount = mes.split(" ")[1]
+    stock_id = m.get_stock_by_name(stock)
+    print(stock_id)
+    price = m.get_stock_price(int(stock_id))
+    print('s')
+    total_price = price * int(amount)
+    print('y')
+    user_money = int(m.get_money(id))
+    print(user_money,total_price)
+    if user_money < total_price:
+        await message.channel.send(embed=send_embed("Stocks", f"> You do not have enough money to buy {amount} {stock.capitalize()} stocks", 0xFF0000))
+        return
+    m.add_money(id, -total_price)
+    m.add_user_stock(id, stock_id, amount)
+    await message.channel.send(embed=send_embed("Stocks", f"> You bought {amount} {stock.capitalize()} stocks for :coin: {total_price}", 0x0000FF))
+    return
 
 
 help_text = """
@@ -346,7 +364,8 @@ commands = {
     '!random':random_number,
     '!stocks':stock_market,
     '!steam_fee':steam_market_fee,
-    '!log':logarithm
+    '!log':logarithm,
+    '!buy':buy_stock,
 }
 
 @client.event
