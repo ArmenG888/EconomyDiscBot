@@ -274,11 +274,8 @@ async def buy_stock(message, id, name, *args):
     stock = mes.split(" ")[0]
     amount = mes.split(" ")[1]
     stock_id = m.get_stock_by_name(stock)
-    print(stock_id)
     price = m.get_stock_price(int(stock_id))
-    print('s')
     total_price = price * int(amount)
-    print('y')
     user_money = int(m.get_money(id))
     print(user_money,total_price)
     if user_money < total_price:
@@ -397,7 +394,8 @@ async def on_message(message):
             role = i
     await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=role))
     
-    name = lambda: message.author.name if len(message.content.split(" ")) <= 1 else message.content.split(" ")[1] # if argument in the message then use that as the name else use the author's name
+    name = lambda: message.author.name
+    print(name)
     id = m.get_user(name()) 
     if not message.content.startswith("!"):
         return
