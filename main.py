@@ -277,7 +277,6 @@ async def buy_stock(message, id, name, *args):
     price = m.get_stock_price(int(stock_id))
     total_price = price * int(amount)
     user_money = int(m.get_money(id))
-    print(user_money,total_price)
     if user_money < total_price:
         await message.channel.send(embed=send_embed("Stocks", f"> You do not have enough money to buy {amount} {stock.capitalize()} stocks", 0xFF0000))
         return
@@ -285,6 +284,21 @@ async def buy_stock(message, id, name, *args):
     m.add_user_stock(id, stock_id, amount)
     await message.channel.send(embed=send_embed("Stocks", f"> You bought {amount} {stock.capitalize()} stocks for :coin: {total_price}", 0x0000FF))
     return
+async def sell_stock(message, id, name, *args):
+    mes = message.content.replace("!sell ", "")
+    stock = mes.split(" ")[0]
+    amount = mes.split(" ")[1]
+    stock_id = m.get_stock_by_name(stock)
+    price = m.get_stock_price(int(stock_id))
+    total_price = price * int(amount)
+    user_stock = m.get_user_stock(id, stock_id)
+    if int(user_stock) <= int(amount):
+        await message.channel.send(embed=send_embed("Stocks", f"> You do not have enough {stock.capitalize()} stocks to sell", 0xFF0000))
+        return
+    m.add_money(id, total_price)
+    m.add_user_stock(id, stock_id, -int(amount))
+    await message.channel.send(embed=send_embed("Stocks", f"> You sold {amount} {stock.capitalize()} stocks for :coin: {total_price}", 0x0000FF))
+
 
 
 help_text = """
@@ -363,6 +377,7 @@ commands = {
     '!steam_fee':steam_market_fee,
     '!log':logarithm,
     '!buy':buy_stock,
+    '!sell':sell_stock,
 }
 
 @client.event
@@ -395,7 +410,6 @@ async def on_message(message):
     await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=role))
     
     name = lambda: message.author.name
-    print(name)
     id = m.get_user(name()) 
     if not message.content.startswith("!"):
         return
