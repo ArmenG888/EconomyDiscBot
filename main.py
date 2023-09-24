@@ -146,9 +146,12 @@ async def steam_market_fee(message, id, name, *args):
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
 
-
 async def logarithm(message, id, name, *args):
-    equation = message.content.split(" ")[1]
+    eq = message.content.split(" ")[1]
+    split_values = re.split(r'(?<=[+\-*/^])|(?=[+\-*/^])', eq)
+    split_values = [value for value in split_values if value is not None and value != '']
+
+    print(split_values)
     def drg(func,trig):
         inside = func.replace(f"{trig}(","").replace(")","")
         if "deg" in inside:
@@ -157,46 +160,70 @@ async def logarithm(message, id, name, *args):
         else:
             inside = float(inside)
         return inside
-    if "log" in equation:
-        log = equation.split(")")[0]
-        base = float(log.replace("log","").split("(")[0])
-        inside = float(log.split("(")[1].replace(")",""))
-        answer = math.log(inside)/math.log(base)
-    elif "sqrt" in equation:
-        inside = float(equation.replace("sqrt(","").replace(")",""))
-        answer = math.sqrt(inside)
-    elif "quad" in equation:
+    total = 0
+    operator = "+"
+    for equation in split_values:
+        if equation in ['+','-','*','/','^']:
+            operator = equation
+            continue
+        if "log" in equation:
+            log = equation.split(")")[0]
+            base = float(log.replace("log","").split("(")[0])
+            inside = float(log.split("(")[1].replace(")",""))
+            answer = math.log(inside)/math.log(base)
+        elif "sqrt" in equation:
+            inside = float(equation.replace("sqrt(","").replace(")",""))
+            answer = math.sqrt(inside)
+        elif "quad" in equation:
+            quad = message.content.split(" ")[2]
+            pattern = r'([-+]?[\d.]*x\^2)?\s*([-+]?[\d.]*x)?\s*([-+]?\d+)?'
+            match = re.match(pattern, quad)
+            if match:
+                a = float(match.group(1).replace('x^2', '').strip()) if match.group(1) else 1.0
+                b = float(match.group(2).replace('x', '').strip()) if match.group(2) else 0.0
+                c = float(match.group(3)) if match.group(3) else 0.0
 
-        quad = message.content.split(" ")[2]
-        pattern = r'([-+]?[\d.]*x\^2)?\s*([-+]?[\d.]*x)?\s*([-+]?\d+)?'
-        match = re.match(pattern, quad)
-        if match:
-            a = float(match.group(1).replace('x^2', '').strip()) if match.group(1) else 1.0
-            b = float(match.group(2).replace('x', '').strip()) if match.group(2) else 0.0
-            c = float(match.group(3)) if match.group(3) else 0.0
+                discriminant = b**2 - 4*a*c
 
-            discriminant = b**2 - 4*a*c
-
-            if discriminant >= 0:
-                root1 = (-b + math.sqrt(discriminant)) / (2*a)
-                root2 = (-b - math.sqrt(discriminant)) / (2*a)
-                answer = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
+                if discriminant >= 0:
+                    root1 = (-b + math.sqrt(discriminant)) / (2*a)
+                    root2 = (-b - math.sqrt(discriminant)) / (2*a)
+                    answer = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
+                else:
+                    answer = "The quadratic equation has no real roots."
             else:
-                answer = "The quadratic equation has no real roots."
+                answer = "Invalid quadratic expression format."
+        elif "sin" in equation:
+            answer = math.sin(drg(equation.split(")")[0],"sin"))
+        elif "cos" in equation:
+            answer = math.cos(drg(equation.split(")")[0],"cos"))
+        elif "tan" in equation:
+            answer = math.tan(drg(equation.split(")")[0],"tan"))
+        elif "pi" in equation:
+            try:
+                answer = math.pi * float(equation.split("pi")[0])
+            except:
+                answer = math.pi
+
+        else:   
+            answer = eval(equation)
+            print(answer)
+        if operator == "+":
+            total += answer
+        elif operator == "-":
+            total -= answer
+        elif operator == "*":
+            total *= answer
+        elif operator == "/":
+            total /= answer
+        elif operator == "^":
+            total **= answer
         else:
-            answer = "Invalid quadratic expression format."
-    elif "sin" in equation:
-        answer = math.sin(drg(equation.split(")")[0],"sin"))
-    elif "cos" in equation:
-        answer = math.cos(drg(equation.split(")")[0],"cos"))
-    elif "tan" in equation:
-        answer = math.tan(drg(equation.split(")")[0],"tan"))
-    
-    else:   
-        answer = eval(equation)
-    if type(answer) == float:
-        answer = round(answer,2)
-    await message.channel.send(embed=send_embed(f"Math", f"{answer}", 0x0000FF))
+            total = answer
+        
+    if type(total) == float:
+        answer = round(total,2)
+    await message.channel.send(embed=send_embed(f"Math", f"{total}", 0x0000FF))
     
 
 
