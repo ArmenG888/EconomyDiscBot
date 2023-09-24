@@ -1,3 +1,4 @@
+import re
 import discord,sqlite3,datetime,random,time,math
 from discord.ui import Button
 import yfinance as yf
@@ -144,13 +145,58 @@ async def steam_market_fee(message, id, name, *args):
 
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
+
+
 async def logarithm(message, id, name, *args):
-    logarithm = message.content.split(" ")[1]
-    logarithm = logarithm.replace(" ", "")
-    base = float(logarithm.split("log")[0].split("(")[0])
-    inside = float(logarithm.split("(")[1].replace(")",""))
-    print(base, inside)
-    await message.channel.send(embed=send_embed(f"Logarithm", f"{math.log(inside)/math.log(base)}", 0x0000FF))
+    equation = message.content.split(" ")[1]
+    def drg(func,trig):
+        inside = func.replace(f"{trig}(","").replace(")","")
+        if "deg" in inside:
+            inside = inside.replace("deg","")
+            inside = math.radians(float(inside))
+        else:
+            inside = float(inside)
+        return inside
+    if "log" in equation:
+        log = equation.split(")")[0]
+        base = float(log.replace("log","").split("(")[0])
+        inside = float(log.split("(")[1].replace(")",""))
+        answer = math.log(inside)/math.log(base)
+    elif "sqrt" in equation:
+        inside = float(equation.replace("sqrt(","").replace(")",""))
+        answer = math.sqrt(inside)
+    elif "quad" in equation:
+
+        quad = message.content.split(" ")[2]
+        pattern = r'([-+]?[\d.]*x\^2)?\s*([-+]?[\d.]*x)?\s*([-+]?\d+)?'
+        match = re.match(pattern, quad)
+        if match:
+            a = float(match.group(1).replace('x^2', '').strip()) if match.group(1) else 1.0
+            b = float(match.group(2).replace('x', '').strip()) if match.group(2) else 0.0
+            c = float(match.group(3)) if match.group(3) else 0.0
+
+            discriminant = b**2 - 4*a*c
+
+            if discriminant >= 0:
+                root1 = (-b + math.sqrt(discriminant)) / (2*a)
+                root2 = (-b - math.sqrt(discriminant)) / (2*a)
+                answer = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
+            else:
+                answer = "The quadratic equation has no real roots."
+        else:
+            answer = "Invalid quadratic expression format."
+    elif "sin" in equation:
+        answer = math.sin(drg(equation.split(")")[0],"sin"))
+    elif "cos" in equation:
+        answer = math.cos(drg(equation.split(")")[0],"cos"))
+    elif "tan" in equation:
+        answer = math.tan(drg(equation.split(")")[0],"tan"))
+    
+    else:   
+        answer = eval(equation)
+    if type(answer) == float:
+        answer = round(answer,2)
+    await message.channel.send(embed=send_embed(f"Math", f"{answer}", 0x0000FF))
     
 
 
@@ -375,7 +421,7 @@ commands = {
     '!random':random_number,
     '!stocks':stock_market,
     '!steam_fee':steam_market_fee,
-    '!log':logarithm,
+    '!math':logarithm,
     '!buy':buy_stock,
     '!sell':sell_stock,
 }
