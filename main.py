@@ -385,6 +385,11 @@ help_text = """
 > - ``!random <min>,<max>`` - Get a random number between min and max if no arguments then get a random number between 0 and 100
 > - ``!random <max>`` - Get a random number between 0 and max
 > - ``!random yn`` - Get a random yes or no
+> - ``!stocks`` - Get the current stock prices
+> - ``!buy <stock> <amount>`` - Buy a stock
+> - ``!sell <stock> <amount>`` - Sell a stock
+> - ``!steam_fee <price>`` - Get the price after steam market fee
+> - ``!math <equation>`` - Solve a math equation
 """
 jobs = [
     'Programmer',
