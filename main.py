@@ -146,12 +146,11 @@ async def steam_market_fee(message, id, name, *args):
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
 
-async def logarithm(message, id, name, *args):
+async def math_equation(message, id, name, *args):
     eq = message.content.split(" ")[1]
     split_values = re.split(r'(?<=[+\-*/^])|(?=[+\-*/^])', eq)
     split_values = [value for value in split_values if value is not None and value != '']
 
-    print(split_values)
     def drg(func,trig):
         inside = func.replace(f"{trig}(","").replace(")","")
         if "deg" in inside:
@@ -453,7 +452,7 @@ commands = {
     '!random':random_number,
     '!stocks':stock_market,
     '!steam_fee':steam_market_fee,
-    '!math':logarithm,
+    '!math':math_equation,
     '!buy':buy_stock,
     '!sell':sell_stock,
 }
