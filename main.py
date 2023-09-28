@@ -145,7 +145,32 @@ async def steam_market_fee(message, id, name, *args):
 
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
+async def graph(message, id, name, *args):
+    def func(x):
+        return x**2
 
+
+    lst = {}
+    for i in range(-4,5):
+        lst[i] = func(i)
+
+
+
+    x = []
+    for i in range(17):
+        x.append(list([0 for i in range(11)]))
+
+
+    for i in lst:
+        print(i)
+        x[lst[i]][i+5] = 1 
+    output = ""
+    for i in x[::-1]:
+        for ii in i:
+            output += str(ii)
+        output += "\n"
+    print(output)
+    await message.channel.send(embed=send_embed(f"Graph for x^2", f"```\n{output}```", 0x0000FF))
 async def math_equation(message, id, name, *args):
     eq = message.content.split(" ")[1]
     split_values = re.split(r'(?<=[+\-*/^])|(?=[+\-*/^])', eq)
@@ -455,6 +480,7 @@ commands = {
     '!math':math_equation,
     '!buy':buy_stock,
     '!sell':sell_stock,
+    '!graph':graph,
 }
 
 @client.event
