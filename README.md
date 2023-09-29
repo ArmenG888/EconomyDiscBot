@@ -20,3 +20,4 @@ A economy bot for discord servers
 - ``!sell <stock> <amount>`` - Sell a stock
 - ``!steam_fee <price>`` - Get the price after steam market fee
 - ``!math <equation>`` - Solve a math equation
+- ``!graph <equation>`` - Graph a math equation
