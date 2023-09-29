@@ -2,6 +2,7 @@ import re
 import discord,sqlite3,datetime,random,time,math
 from discord.ui import Button
 import yfinance as yf
+import numpy as np
 
 
 intents = discord.Intents.default()
@@ -146,31 +147,45 @@ async def steam_market_fee(message, id, name, *args):
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
 
 async def graph(message, id, name, *args):
+    
+    output = ""
+    size = 20
+    lst = np.zeros((size-1, size-1))
+
+
     def func(x):
         return x**2
 
 
-    lst = {}
-    for i in range(-4,5):
-        lst[i] = func(i)
+    f_of_x = {}
+    for i in range(-10,10):
 
+        f_of_x[i] = eval(message.content.replace("!graph ","").replace("^","**").replace("x",f"({str(i)})"))
+    print(f_of_x)
 
+    for i in f_of_x:
+        x_index = i + 9 
+        y_index = int(f_of_x[i]) + 9
+        if 0 <= x_index < size and 0 <= y_index < size:
+            lst[y_index, x_index] = 1
 
-    x = []
-    for i in range(17):
-        x.append(list([0 for i in range(11)]))
+    for indx,i in enumerate(lst[::-1]):
 
-
-    for i in lst:
-        print(i)
-        x[lst[i]][i+5] = 1 
-    output = ""
-    for i in x[::-1]:
-        for ii in i:
-            output += str(ii)
-        output += "\n"
-    print(output)
-    await message.channel.send(embed=send_embed(f"Graph for x^2", f"```\n{output}```", 0x0000FF))
+        if 9-indx >= 0:
+            output += f" {9-indx} {i}\n"
+        else:
+            output += f"{9-indx} {i}\n"
+            
+    x = ""
+    for i in range(-9,10):
+        if i == -9:
+            x += f"   {i} "
+        elif i >= 0:
+            x += f" {i} "
+        else:
+            x += f"{i} "
+    output += x
+    await message.channel.send(embed=send_embed(f"Graph for f(x)={message.content.replace('!graph ','')}", f"```\n{output}```", 0x0000FF))
 async def math_equation(message, id, name, *args):
     eq = message.content.split(" ")[1]
     split_values = re.split(r'(?<=[+\-*/^])|(?=[+\-*/^])', eq)
