@@ -148,19 +148,14 @@ async def steam_market_fee(message, id, name, *args):
 
 async def graph(message, id, name, *args):
     
-    output = ""
     size = 20
     lst = np.zeros((size-1, size-1))
 
 
-    def func(x):
-        return x**2
-
-
     f_of_x = {}
     for i in range(-10,10):
-
         f_of_x[i] = eval(message.content.replace("!graph ","").replace("^","**").replace("x",f"({str(i)})"))
+
     print(f_of_x)
 
     for i in f_of_x:
@@ -169,22 +164,31 @@ async def graph(message, id, name, *args):
         if 0 <= x_index < size and 0 <= y_index < size:
             lst[y_index, x_index] = 1
 
+    output = ""
+    x = 0
+    output += "           Y\n"
     for indx,i in enumerate(lst[::-1]):
-
         if 9-indx >= 0:
-            output += f" {9-indx} {i}\n"
+            output += f" {9-indx}"
         else:
-            output += f"{9-indx} {i}\n"
-            
-    x = ""
-    for i in range(-9,10):
-        if i == -9:
-            x += f"   {i} "
-        elif i >= 0:
-            x += f" {i} "
-        else:
-            x += f"{i} "
-    output += x
+            output += f"{9-indx}"
+        
+        for ii in i:
+            if ii == 0:
+                if x == 9:
+                    output += "|"
+                        
+                else:
+                    output += " "
+                
+            else:
+                output += "█"
+            x += 1
+        if 9-indx == 0:
+            output += "\n X <---------------> X"
+        output += "\n"
+        x = 0
+    output += "           Y\n"
     await message.channel.send(embed=send_embed(f"Graph for f(x)={message.content.replace('!graph ','')}", f"```\n{output}```", 0x0000FF))
 async def math_equation(message, id, name, *args):
     eq = message.content.split(" ")[1]
