@@ -153,17 +153,25 @@ async def graph(message, id, name, *args):
 
 
     f_of_x = {}
-    for i in range(-10,10):
-        f_of_x[i] = eval(message.content.replace("!graph ","").replace("^","**").replace("x",f"({str(i)})"))
-
+    for i in range(-9,9):
+        try:
+            eq = message.content.replace("!graph ","").replace("^","**").replace("x",f"*({str(i)})")
+            if eq[0] == "*":
+                eq = eq[1:]
+            print(eq)
+            f_of_x[i] = eval(eq)
+        except Exception as e:
+            print(e)
     print(f_of_x)
 
     for i in f_of_x:
-        x_index = i + 9 
-        y_index = int(f_of_x[i]) + 9
-        if 0 <= x_index < size and 0 <= y_index < size:
-            lst[y_index, x_index] = 1
-
+        try:
+            x_index = i + 9 
+            y_index = int(f_of_x[i]) + 9
+            if 0 <= x_index < size and 0 <= y_index < size:
+                lst[y_index, x_index] = 1
+        except:
+            continue
     output = ""
     x = 0
     output += "           Y\n"
