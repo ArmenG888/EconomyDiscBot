@@ -541,6 +541,9 @@ async def on_message(message):
         await message.channel.send("https://media.tenor.com/tNfzy9M48V8AAAAd/skull-issues.gif")
     if "💀" in message.content:
         await message.channel.send("https://media.tenor.com/g1bZgt4-tL4AAAAC/skull.gif")
+    if "well well well" in message.content.lower():
+        await message.channel.send("https://media.discordapp.net/attachments/916202280800358440/1158142345108262922/image.png?ex=651b2b9c&is=6519da1c&hm=c959563c672c10205679cda7ebf0915a4117a44a7bf90e2cdc076bd2c05a025b&=&width=516&height=671")
+
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
         if xp > int(levels[i]):
