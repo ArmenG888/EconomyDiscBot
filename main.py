@@ -531,9 +531,16 @@ levels = {
 
 @client.event
 async def on_message(message):
+    print(message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
-   
+    if "👍 💀 👍" in message.content:
+        await message.channel.send("https://media.discordapp.net/attachments/1106786830218706944/1110722091298324541/IMG_8605.gif")
+        return
+    if "☠️" in message.content:
+        await message.channel.send("https://media.tenor.com/tNfzy9M48V8AAAAd/skull-issues.gif")
+    if "💀" in message.content:
+        await message.channel.send("https://media.tenor.com/g1bZgt4-tL4AAAAC/skull.gif")
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
         if xp > int(levels[i]):
