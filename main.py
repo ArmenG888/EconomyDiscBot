@@ -1,7 +1,9 @@
 import re
 import discord,sqlite3,datetime,random,time,math
 from discord.ui import Button
+import sympy as sp
 import yfinance as yf
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -145,8 +147,47 @@ async def steam_market_fee(message, id, name, *args):
         price += 0.02
 
     await message.channel.send(embed=send_embed(f"Steam", f"Price after fee: {price}", 0x0000FF))
-
+    
+def evaluate_equation(eq, x_values):
+    x = sp.symbols('x')
+    expression = sp.sympify(eq)
+    y_values = [sp.N(expression.subs(x, value)) for value in x_values]
+    return y_values
 async def graph(message, id, name, *args):
+    equation = message.content.replace("!graph ","").replace("^","**")
+    equation = re.sub(r'([0-9])([a-zA-Z])', r'\1*\2', equation)
+    x_values = np.linspace(-2, 2, 400)  # Adjust the range and number of points as needed
+
+    # Evaluate the equation
+    try:
+        y_values = evaluate_equation(equation, x_values)
+
+        # Create a plot
+        plt.figure(figsize=(8, 6))
+        plt.plot(x_values, y_values, label=f'y = {equation}')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title(f'Graph of y = {equation}')
+        plt.grid(True)
+        x_integers = np.arange(-2, 3)
+        y_integers = [evaluate_equation(equation, [x])[0] for x in x_integers]
+        plt.scatter(x_integers, y_integers, color='red', marker='o', label='Integer Points')
+        plt.axhline(0, color='black',linewidth=0.5)  # Add a horizontal axis line
+        plt.axvline(0, color='black',linewidth=0.5)
+        #plt.xticks(np.arange(-4,5, 1))  # Adjust the range and interval as needed for the x-axis
+        plt.axis('equal')
+        plt.legend()
+
+        # Save the plot as an image
+        plt.savefig('equation_graph.png', dpi=300)
+            
+        # Send the image to the Discord channel
+        with open('equation_graph.png', 'rb') as file:
+            await message.channel.send(f'Graph of y = {equation}', file=discord.File(file))
+    except Exception as e:
+        print(e)
+        
+async def graph_ascii(message, id, name, *args):
     
     size = 20
     lst = np.zeros((size-1, size-1))
@@ -534,15 +575,6 @@ async def on_message(message):
     print(message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
-    if "👍 💀 👍" in message.content:
-        await message.channel.send("https://media.discordapp.net/attachments/1106786830218706944/1110722091298324541/IMG_8605.gif")
-        return
-    if "☠️" in message.content:
-        await message.channel.send("https://media.tenor.com/tNfzy9M48V8AAAAd/skull-issues.gif")
-    if "💀" in message.content:
-        await message.channel.send("https://media.tenor.com/g1bZgt4-tL4AAAAC/skull.gif")
-    if "well well well" in message.content.lower():
-        await message.channel.send("https://media.discordapp.net/attachments/916202280800358440/1158142345108262922/image.png?ex=651b2b9c&is=6519da1c&hm=c959563c672c10205679cda7ebf0915a4117a44a7bf90e2cdc076bd2c05a025b&=&width=516&height=671")
 
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
