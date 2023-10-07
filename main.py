@@ -151,12 +151,17 @@ async def steam_market_fee(message, id, name, *args):
 def evaluate_equation(eq, x_values):
     x = sp.symbols('x')
     expression = sp.sympify(eq)
-    y_values = [sp.N(expression.subs(x, value)) for value in x_values]
+    y_values = []
+    for value in x_values:
+        y_val = expression.subs(x, value)
+        # Use real part if complex, otherwise use the value directly
+        y_values.append(float(y_val.as_real_imag()[0]))
     return y_values
 async def graph(message, id, name, *args):
-    equation = message.content.replace("!graph ","").replace("^","**")
+    equation = message.content.replace("!graph ","").replace("y=","").replace("^","**")
     equation = re.sub(r'([0-9])([a-zA-Z])', r'\1*\2', equation)
-    x_values = np.linspace(-2, 2, 400)  # Adjust the range and number of points as needed
+    rangex = 3
+    x_values = np.linspace(-rangex, rangex, 400)  # Adjust the range and number of points as needed
 
     # Evaluate the equation
     try:
@@ -164,18 +169,18 @@ async def graph(message, id, name, *args):
 
         # Create a plot
         plt.figure(figsize=(8, 6))
-        plt.plot(x_values, y_values, label=f'y = {equation}')
+        plt.plot(x_values, y_values, label=f'y = {message.content.replace("!graph ","").replace("y=","")}')
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.title(f'Graph of y = {equation}')
+        plt.title(f'Graph of y = {message.content.replace("!graph ","").replace("y=","")}')
         plt.grid(True)
-        x_integers = np.arange(-2, 3)
+        x_integers = np.arange(-rangex, rangex)
         y_integers = [evaluate_equation(equation, [x])[0] for x in x_integers]
         plt.scatter(x_integers, y_integers, color='red', marker='o', label='Integer Points')
         plt.axhline(0, color='black',linewidth=0.5)  # Add a horizontal axis line
         plt.axvline(0, color='black',linewidth=0.5)
         #plt.xticks(np.arange(-4,5, 1))  # Adjust the range and interval as needed for the x-axis
-        plt.axis('equal')
+        #plt.axis('equal')
         plt.legend()
 
         # Save the plot as an image
@@ -183,7 +188,7 @@ async def graph(message, id, name, *args):
             
         # Send the image to the Discord channel
         with open('equation_graph.png', 'rb') as file:
-            await message.channel.send(f'Graph of y = {equation}', file=discord.File(file))
+            await message.channel.send(f'Graph of y = {message.content.replace("!graph ","").replace("y=","")}', file=discord.File(file))
     except Exception as e:
         print(e)
         
