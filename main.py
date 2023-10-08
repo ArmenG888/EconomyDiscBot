@@ -157,8 +157,24 @@ def evaluate_equation(eq, x_values):
         # Use real part if complex, otherwise use the value directly
         y_values.append(float(y_val.as_real_imag()[0]))
     return y_values
+
+colors = [
+    'red',
+    'blue',
+    'green',
+    'yellow',
+    'black',
+    'white',
+    'orange',
+    'purple',
+    'brown',
+    'pink',
+]
 async def graph(message, id, name, *args):
-    equation = message.content.replace("!graph ","").replace("y=","").replace("^","**")
+    equation = message.content.replace("!graph ","").replace("y=","").replace("^","**").split(" ")[0]
+    color = "blue"
+    if message.content.replace("!graph ","").split(" ")[1] in colors:
+        color = message.content.replace("!graph ","").split(" ")[1]
     equation = re.sub(r'([0-9])([a-zA-Z])', r'\1*\2', equation)
     rangex = 3
     x_values = np.linspace(-rangex, rangex, 400)  # Adjust the range and number of points as needed
@@ -169,12 +185,13 @@ async def graph(message, id, name, *args):
 
         # Create a plot
         plt.figure(figsize=(8, 6))
-        plt.plot(x_values, y_values, label=f'y = {message.content.replace("!graph ","").replace("y=","")}')
+        plt.plot(x_values, y_values, label=f'y = {message.content.replace("!graph ","").replace("y=","").split(" ")[0]}',color=color)
         plt.xlabel('x')
         plt.ylabel('y')
-        plt.title(f'Graph of y = {message.content.replace("!graph ","").replace("y=","")}')
+        plt.title(f'Graph of y = {message.content.replace("!graph ","").replace("y=","").split(" ")[0]}')
         plt.grid(True)
-        x_integers = np.arange(-rangex, rangex)
+        
+        x_integers = np.arange(-rangex, rangex+1)
         y_integers = [evaluate_equation(equation, [x])[0] for x in x_integers]
         plt.scatter(x_integers, y_integers, color='red', marker='o', label='Integer Points')
         plt.axhline(0, color='black',linewidth=0.5)  # Add a horizontal axis line
