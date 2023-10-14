@@ -99,6 +99,14 @@ class main:
 
 
 m = main()
+class Buttons(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+
+    @discord.ui.button(label='Click Me!', style=discord.ButtonStyle.primary)
+    async def test(self,interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message('Button clicked!', ephemeral=True)
+
 
 def send_embed(title, description, color=0x00FF00):
     embed = discord.Embed(title=title, description=description)
@@ -106,7 +114,7 @@ def send_embed(title, description, color=0x00FF00):
     return embed
 
 async def test(message, id, name, *args):
-    await message.channel.send(content="Click the button below!", components=[Button(label="Click me!", custom_id="button1")])
+    await message.channel.send("test", view=Buttons())
 async def set_money(message, id, name, *args):
     if args[0] == True:
         money = m.set_money(id, message.content.split(" ")[2])
