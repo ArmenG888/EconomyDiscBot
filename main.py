@@ -1,15 +1,16 @@
 import re
 import discord,sqlite3,datetime,random,time,math
-from discord.ui import Button
+
 import sympy as sp
 import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 intents = discord.Intents.default()
 intents.message_content = True 
 client = discord.Client(intents=intents)
+
+
 
 class main:
     def __init__(self):
@@ -99,22 +100,13 @@ class main:
 
 m = main()
 
-class Buttons(discord.ui.View):
-    def __init__(self, inv:str):
-        super().__init__()
-        self.inv = inv
-        self.add_item(discord.ui.Button(label="Click Me!", style=discord.ButtonStyle.primary, custom_id="test"))
-
-    @discord.ui.button(label='Click Me!', style=discord.ButtonStyle.primary, custom_id="test")
-    async def test(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message('Button clicked!', ephemeral=True)
-
-
 def send_embed(title, description, color=0x00FF00):
     embed = discord.Embed(title=title, description=description)
     embed.color = color
     return embed
 
+async def test(message, id, name, *args):
+    await message.channel.send(content="Click the button below!", components=[Button(label="Click me!", custom_id="button1")])
 async def set_money(message, id, name, *args):
     if args[0] == True:
         money = m.set_money(id, message.content.split(" ")[2])
@@ -572,6 +564,7 @@ commands = {
     '!buy':buy_stock,
     '!sell':sell_stock,
     '!graph':graph,
+    '!test':test,
 }
 
 @client.event
