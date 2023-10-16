@@ -100,13 +100,21 @@ class main:
 
 m = main()
 class Buttons(discord.ui.View):
-    def __init__(self):
+    def __init__(self,i):
         super().__init__()
-
-    @discord.ui.button(label='Click Me!', style=discord.ButtonStyle.primary)
+        print(i)
+    @discord.ui.button(label='Get a lawyer ($100)', style=discord.ButtonStyle.primary)
+    async def test(self,interaction: discord.Interaction, button: discord.ui.Button):
+        random_number = random.randint(0,1)
+        if random_number == 0:
+            await interaction.response.send_message('You got a lawyer and won the case!', ephemeral=True)
+        else:
+            await interaction.response.send_message('You got a lawyer and lost the case!', ephemeral=True)
+        await interaction.response.send_message('Button clicked!', ephemeral=True)
+    
+    @discord.ui.button(label='Free lawyer', style=discord.ButtonStyle.primary)
     async def test(self,interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_message('Button clicked!', ephemeral=True)
-
 
 def send_embed(title, description, color=0x00FF00):
     embed = discord.Embed(title=title, description=description)
@@ -114,7 +122,7 @@ def send_embed(title, description, color=0x00FF00):
     return embed
 
 async def test(message, id, name, *args):
-    await message.channel.send("test", view=Buttons())
+    await message.channel.send("test", view=Buttons(100))
 async def set_money(message, id, name, *args):
     if args[0] == True:
         money = m.set_money(id, message.content.split(" ")[2])
