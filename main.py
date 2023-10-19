@@ -110,7 +110,7 @@ class Buttons(discord.ui.View):
             await interaction.response.send_message('You got a lawyer and won the case!', ephemeral=True)
         else:
             await interaction.response.send_message('You got a lawyer and lost the case!', ephemeral=True)
-        await interaction.response.send_message('Button clicked!', ephemeral=True)
+        #await interaction.response.send_message('Button clicked!', ephemeral=True)
     
     @discord.ui.button(label='Free lawyer', style=discord.ButtonStyle.primary)
     async def test(self,interaction: discord.Interaction, button: discord.ui.Button):
@@ -580,6 +580,7 @@ commands = {
     '!buy':buy_stock,
     '!sell':sell_stock,
     '!graph':graph,
+    '!graph_old':graph_ascii,
     '!test':test,
 }
 
