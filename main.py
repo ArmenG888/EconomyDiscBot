@@ -226,7 +226,7 @@ async def graph_ascii(message, id, name, *args):
     f_of_x = {}
     for i in range(-9,9):
         try:
-            eq = message.content.replace("!graph ","").replace("^","**").replace("x",f"*({str(i)})")
+            eq = message.content.replace("!graph_old ","").replace("^","**").replace("x",f"*({str(i)})")
             if eq[0] == "*":
                 eq = eq[1:]
             print(eq)
@@ -310,17 +310,37 @@ async def math_equation(message, id, name, *args):
                 if discriminant >= 0:
                     root1 = (-b + math.sqrt(discriminant)) / (2*a)
                     root2 = (-b - math.sqrt(discriminant)) / (2*a)
-                    answer = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
+                    total = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
                 else:
-                    answer = "The quadratic equation has no real roots."
+                    total = "The quadratic equation has no real roots."
             else:
-                answer = "Invalid quadratic expression format."
+                total = "Invalid quadratic expression format."
+            await message.channel.send(embed=send_embed(f"Math", f"{total}", 0x0000FF))
+        elif "atan" in equation:
+            answer = math.atan(drg(equation.split(")")[0],"atan"))
+        elif "cot" in equation:
+            answer = 1/math.tan(drg(equation.split(")")[0],"cot"))
+        elif "sec" in equation:
+            answer = 1/math.cos(drg(equation.split(")")[0],"sec"))
+        elif "csc" in equation:
+            answer = 1/math.sin(drg(equation.split(")")[0],"csc"))
+        elif "ln" in equation:
+            answer = math.log(drg(equation.split(")")[0],"ln"))
         elif "sin" in equation:
             answer = math.sin(drg(equation.split(")")[0],"sin"))
         elif "cos" in equation:
             answer = math.cos(drg(equation.split(")")[0],"cos"))
         elif "tan" in equation:
             answer = math.tan(drg(equation.split(")")[0],"tan"))
+        elif "asin" in equation:
+            answer = math.asin(drg(equation.split(")")[0],"asin"))
+        elif "acos" in equation:
+            answer = math.acos(drg(equation.split(")")[0],"acos"))
+        elif "e" in equation:
+            try:
+                answer = math.e * float(equation.split("e")[0])
+            except:
+                answer = math.e
         elif "pi" in equation:
             try:
                 answer = math.pi * float(equation.split("pi")[0])
@@ -607,6 +627,10 @@ async def on_message(message):
     print(message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
+
+    if "danny" in message.content.lower():
+         await message.channel.send("Fatass :japanese_goblin: ")
+
 
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
