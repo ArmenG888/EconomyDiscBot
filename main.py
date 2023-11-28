@@ -226,7 +226,7 @@ async def graph_ascii(message, id, name, *args):
     f_of_x = {}
     for i in range(-9,9):
         try:
-            eq = message.content.replace("!graph_old ","").replace("^","**").replace("x",f"*({str(i)})")
+            eq = message.content.replace("!graph_old ","").replace("!math quad ","").replace("^","**").replace("x",f"*({str(i)})")
             if eq[0] == "*":
                 eq = eq[1:]
             print(eq)
@@ -298,6 +298,7 @@ async def math_equation(message, id, name, *args):
             answer = math.sqrt(inside)
         elif "quad" in equation:
             quad = message.content.split(" ")[2]
+            print(quad)
             pattern = r'([-+]?[\d.]*x\^2)?\s*([-+]?[\d.]*x)?\s*([-+]?\d+)?'
             match = re.match(pattern, quad)
             if match:
@@ -310,12 +311,26 @@ async def math_equation(message, id, name, *args):
                 if discriminant >= 0:
                     root1 = (-b + math.sqrt(discriminant)) / (2*a)
                     root2 = (-b - math.sqrt(discriminant)) / (2*a)
-                    total = f"\n **Solution** \nx-inter=**({round(root1,2)},0)**,**({round(root2,2)},0)**\ny-inter=**({0},{c})**"
+                    total = f"""
+                    ## Solution
+
+                    **x-intercepts**
+                    ``({round(root1,2)},0.0)``,
+                    ``({round(root2,2)},0.0)``
+
+                    **y-intercept**
+                    ``({0},{c})``
+                    """
+                    
                 else:
                     total = "The quadratic equation has no real roots."
+                
             else:
                 total = "Invalid quadratic expression format."
-            await message.channel.send(embed=send_embed(f"Math", f"{total}", 0x0000FF))
+            await message.channel.send(embed=send_embed(f"# Math", f"{total}", 0x0000FF))
+            if "Invalid" not in total:
+                await graph_ascii(message, id, name)
+            return
         elif "atan" in equation:
             answer = math.atan(drg(equation.split(")")[0],"atan"))
         elif "cot" in equation:
