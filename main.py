@@ -1,3 +1,4 @@
+import cmath
 import re
 import discord,sqlite3,datetime,random,time,math
 
@@ -179,21 +180,20 @@ colors = [
     'pink',
 ]
 async def graph(message, id, name, *args):
-    equation = message.content.replace("!graph ","").replace("y=","").replace("^","**").split(" ")[0]
+    equation = message.content.replace("!graph ","").replace("!math quad ","").replace("y=","").replace("^","**")
     color = "blue"
-    if message.content.replace("!graph ","").split(" ")[1] in colors:
-        color = message.content.replace("!graph ","").split(" ")[1]
+
     equation = re.sub(r'([0-9])([a-zA-Z])', r'\1*\2', equation)
     rangex = 3
     x_values = np.linspace(-rangex, rangex, 400)  # Adjust the range and number of points as needed
-
+    print(equation)
     # Evaluate the equation
     try:
         y_values = evaluate_equation(equation, x_values)
 
         # Create a plot
         plt.figure(figsize=(8, 6))
-        plt.plot(x_values, y_values, label=f'y = {message.content.replace("!graph ","").replace("y=","").split(" ")[0]}',color=color)
+        plt.plot(x_values, y_values, label=f'y = {message.content.replace("!graph ","").replace("!math quad ","").replace("y=","").split(" ")[0]}',color=color)
         plt.xlabel('x')
         plt.ylabel('y')
         plt.title(f'Graph of y = {message.content.replace("!graph ","").replace("y=","").split(" ")[0]}')
@@ -308,28 +308,25 @@ async def math_equation(message, id, name, *args):
 
                 discriminant = b**2 - 4*a*c
 
-                if discriminant >= 0:
-                    root1 = (-b + math.sqrt(discriminant)) / (2*a)
-                    root2 = (-b - math.sqrt(discriminant)) / (2*a)
-                    total = f"""
-                    ## Solution
 
-                    **x-intercepts**
-                    ``({round(root1,2)},0.0)``,
-                    ``({round(root2,2)},0.0)``
+                root1 = (-b + cmath.sqrt(discriminant)) / (2*a)
+                root2 = (-b - cmath.sqrt(discriminant)) / (2*a)
+                total = f"""
+                ## Solution
 
-                    **y-intercept**
-                    ``({0},{c})``
-                    """
-                    
-                else:
-                    total = "The quadratic equation has no real roots."
+                **x-intercepts**
+                ``({root1},0.0)``,
+                ``({root2},0.0)``
+
+                **y-intercept**
+                ``({0},{c})``
+                """
                 
             else:
                 total = "Invalid quadratic expression format."
             await message.channel.send(embed=send_embed(f"# Math", f"{total}", 0x0000FF))
             if "Invalid" not in total:
-                await graph_ascii(message, id, name)
+                await graph(message, id, name)
             return
         elif "atan" in equation:
             answer = math.atan(drg(equation.split(")")[0],"atan"))
