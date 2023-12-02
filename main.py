@@ -308,12 +308,24 @@ async def math_equation(message, id, name, *args):
 
                 discriminant = b**2 - 4*a*c
 
+                if discriminant < 0:
+                    text = "No real roots. Two Complex"
+                    root1 = (-b + cmath.sqrt(discriminant)) / (2*a)
+                    root2 = (-b - cmath.sqrt(discriminant)) / (2*a)
+                elif discriminant == 0:
+                    text = "One real root, One Complex"
+                    root1 = (-b + cmath.sqrt(discriminant)) / (2*a)
+                    root2 = (-b - cmath.sqrt(discriminant)) / (2*a)
+                else:
+                    text = "Two Real Roots"
+                    root1 = (-b + math.sqrt(discriminant)) / (2*a)
+                    root2 = (-b - math.sqrt(discriminant)) / (2*a)
 
-                root1 = (-b + cmath.sqrt(discriminant)) / (2*a)
-                root2 = (-b - cmath.sqrt(discriminant)) / (2*a)
                 total = f"""
                 ## Solution
 
+                {{{a}}}x^2 + {{{b}}}x + {{{c}}} = 0
+                {text}
                 **x-intercepts**
                 ``({root1},0.0)``,
                 ``({root2},0.0)``
