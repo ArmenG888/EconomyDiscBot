@@ -216,7 +216,46 @@ async def graph(message, id, name, *args):
             await message.channel.send(f'Graph of y = {message.content.replace("!graph ","").replace("y=","")}', file=discord.File(file))
     except Exception as e:
         print(e)
-        
+async def table(message, id, name, *args):
+    info = [
+        {'name': 'D. Thomas', 'time': '2:01.437', 'laps': '88', 'pos': '1', 'delta':'+0.000', 'car':'14'},
+        {'name': 'C. Schutte', 'time': '2:02.220', 'laps': '73', 'pos': '2', 'delta':'+0.783', 'car':'15'},
+        {'name': 'E. Ghoukasian', 'time': '2:02.670', 'laps': '50', 'pos': '3', 'delta':'+0.408', 'car':'23'},
+        {'name': 'N. Kerbal', 'time': '2:03.262', 'laps': '60', 'pos': '4', 'delta':'+0.552', 'car':'6'},
+        {'name': 'P. Chronotis', 'time': '2:03.710', 'laps': '8', 'pos': '5', 'delta':'+0.448', 'car':'8'},
+        {'name': 'R. Gross', 'time': '2:03.962', 'laps': '103', 'pos': '6', 'delta':'+0.252', 'car':'6'},
+        {'name': 'A. Miller', 'time': '2:05.687', 'laps': '16', 'pos': '7', 'delta':'+1.725', 'car':'2'},
+        {'name': 'K. Rivera', 'time': 'N/A', 'laps': '0', 'pos': '8', 'delta': 'N/A   ', 'car':'1'}
+    ]
+    # caclulate the deltas 
+    info = sorted(info, key=lambda k: k['pos'])
+
+    # Find the maximum length of each column
+    max_len_name = max(len(item['name']) for item in info)
+    max_len_time = max(len(item['time']) for item in info)
+    max_delta = max(len(item['delta']) for item in info)
+    max_len_laps = max(len(item['laps']) for item in info)
+    max_len_pos = max(len(item['pos']) for item in info)
+
+
+    most_laps_completed = sorted(info, key=lambda k: int(k['laps']), reverse=True)[0]['name']
+    print(sorted(info, key=lambda k: int(k['laps']), reverse=True))
+    # Construct the table header
+    date = datetime.datetime.now().strftime("%m/%d/%Y")
+    text = f"- Best Lap Time set by **{info[0]['name']}**\n"
+    text += f"- Most Lap Completed by **{most_laps_completed}**\n"
+    text += f"```Pos\t{'Name'.ljust(max_len_name)}\t{'Time'.ljust(max_len_time)}\t{'Delta'.ljust(max_delta)}\t{'Laps'.ljust(max_len_laps)}\t{} \n"
+
+    # Construct each row of the table
+    for item in info:
+        row = f"{item['pos'].ljust(max_len_pos)}\t  {item['name'].ljust(max_len_name)}\t{item['time'].ljust(max_len_time)}\t{item['delta']}\t{item['laps'].ljust(max_len_laps)}\n"
+        text += row
+    text += "```"
+    await message.channel.send(embed=send_embed(f"Results for Practice {date}", text, 0x0000FF))
+
+    
+
+
 async def graph_ascii(message, id, name, *args):
     
     size = 20
@@ -435,6 +474,56 @@ stocks = {
     'amazon': 'AMZN',
 }
 
+cars = {
+    "0": "Porsche 991 GT3 R",
+    "1": "Mercedes-AMG GT3",
+    "2": "Ferrari 488 GT3",
+    "3": "Audi R8 LMS",
+    "4": "Lamborghini Huracan GT3",
+    "5": "McLaren 650S GT3",
+    "6": "Nissan GT-R Nismo GT3 2018",
+    "7": "BMW M6 GT3",
+    "8": "Bentley Continental GT3 2018",
+    "9": "Porsche 991II GT3 Cup",
+    "10": "Nissan GT-R Nismo GT3 2017",
+    "11": "Bentley Continental GT3 2016",
+    "12": "Aston Martin V12 Vantage GT3",
+    "13": "Lamborghini Gallardo R-EX",
+    "14": "Jaguar G3",
+    "15": "Lexus RC F GT3",
+    "16": "Lamborghini Huracan Evo (2019)",
+    "17": "Honda NSX GT3",
+    "18": "Lamborghini Huracan SuperTrofeo",
+    "19": "Audi R8 LMS Evo (2019)",
+    "20": "AMR V8 Vantage (2019)",
+    "21": "Honda NSX Evo (2019)",
+    "22": "McLaren 720S GT3 (2019)",
+    "23": "Porsche 911II GT3 R (2019)",
+    "24": "Ferrari 488 GT3 Evo 2020",
+    "25": "Mercedes-AMG GT3 2020",
+    "26": "Ferrari 488 Challenge Evo",
+    "27": "BMW M2 CS Racing",
+    "28": "Porsche 911 GT3 Cup (Type 992)",
+    "29": "Lamborghini Huracán Super Trofeo EVO2",
+    "30": "BMW M4 GT3",
+    "31": "Audi R8 LMS GT3 evo II",
+    "32": "Ferrari 296 GT3",
+    "33": "Lamborghini Huracan Evo2",
+    "34": "Porsche 992 GT3 R",
+    "35": "McLaren 720S GT3 Evo 2023",
+    "50": "Alpine A110 GT4",
+    "51": "AMR V8 Vantage GT4",
+    "52": "Audi R8 LMS GT4",
+    "53": "BMW M4 GT4",
+    "55": "Chevrolet Camaro GT4",
+    "56": "Ginetta G55 GT4",
+    "57": "KTM X-Bow GT4",
+    "58": "Maserati MC GT4",
+    "59": "McLaren 570S GT4",
+    "60": "Mercedes-AMG GT4",
+    "61": "Porsche 718 Cayman GT4"
+  }
+
 
 
 time_formats = {
@@ -626,6 +715,7 @@ commands = {
     '!graph':graph,
     '!graph_old':graph_ascii,
     '!test':test,
+    '!table':table,
 }
 
 @client.event
@@ -651,10 +741,6 @@ async def on_message(message):
     print(message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
-
-    if "danny" in message.content.lower():
-         await message.channel.send("Fatass :japanese_goblin: ")
-
 
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
