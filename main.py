@@ -1,16 +1,19 @@
-import cmath
-import re
-import discord,sqlite3,datetime,random,time,math
-
+import discord,sqlite3,datetime,random,time,math,cmath,re
 import sympy as sp
 import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
+import requests
+from bs4 import BeautifulSoup as BS
+
 
 intents = discord.Intents.default()
 intents.message_content = True 
 client = discord.Client(intents=intents)
-
+s = requests.Session()
+headers = {
+    "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36'
+}
 
 
 class main:
@@ -244,7 +247,7 @@ async def table(message, id, name, *args):
     date = datetime.datetime.now().strftime("%m/%d/%Y")
     text = f"- Best Lap Time set by **{info[0]['name']}**\n"
     text += f"- Most Lap Completed by **{most_laps_completed}**\n"
-    text += f"```Pos\t{'Name'.ljust(max_len_name)}\t{'Time'.ljust(max_len_time)}\t{'Delta'.ljust(max_delta)}\t{'Laps'.ljust(max_len_laps)}\t{} \n"
+    #text += f"```Pos\t{'Name'.ljust(max_len_name)}\t{'Time'.ljust(max_len_time)}\t{'Delta'.ljust(max_delta)}\t{'Laps'.ljust(max_len_laps)}\t{} \n"
 
     # Construct each row of the table
     for item in info:
@@ -627,8 +630,28 @@ async def sell_stock(message, id, name, *args):
     m.add_user_stock(id, stock_id, -int(amount))
     await message.channel.send(embed=send_embed("Stocks", f"> You sold {amount} {stock.capitalize()} stocks for :coin: {total_price}", 0x0000FF))
 
+async def steam_status(message, id, name, *args):
+    text = ""
+    def scrape(url):
+        site = s.get(url,headers=headers)
+        anw_bs = BS(site.content, 'html.parser')
+        username = anw_bs.find(class_="actual_persona_name").text
+        status = anw_bs.find(class_="profile_in_game_header").text
 
-
+        if status == "Currently In-Game":
+            game_name = anw_bs.find(class_="profile_in_game_name").text
+            return (":green_circle: " + username + " playing **" + game_name + "**")
+        else:
+            status = status.split(" ")[-1]
+            if "Offline" in status:
+                return (":black_circle: " + username + " **" + status + "**")
+            else:
+                return (":blue_circle: " + username + " **" + status + "**")
+    with open("urls.txt", "r") as r:
+        r = r.read().split("\n")
+    for i in r:
+        text += "- " + scrape(i) + "\n"
+    await message.channel.send(embed=send_embed("Steam Status", text, 0x0000FF))
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
@@ -646,6 +669,8 @@ help_text = """
 > - ``!steam_fee <price>`` - Get the price after steam market fee
 > - ``!math <equation>`` - Solve a math equation
 > - ``!graph <equation>`` - Graph a math equation
+> - ``!graph_old <equation>`` - Graph a math equation in ascii
+> - ``!steam_status`` - Get the status of the steam users from the urls.txt file
 """
 jobs = [
     'Programmer',
@@ -716,6 +741,7 @@ commands = {
     '!graph_old':graph_ascii,
     '!test':test,
     '!table':table,
+    '!steam_status':steam_status,
 }
 
 @client.event
@@ -741,7 +767,6 @@ async def on_message(message):
     print(message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
-
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
         if xp > int(levels[i]):
