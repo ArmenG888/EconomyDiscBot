@@ -20,6 +20,11 @@ class main:
     def __init__(self):
         self.con = sqlite3.connect("db.sqlite3")
         self.cur = self.con.cursor()
+    def list_of_users(self):
+        self.cur.execute("SELECT name FROM main_user WHERE xp IS NOT NULL")
+        users = self.cur.fetchall()
+        return users
+
     def get_user(self, name):
         self.cur.execute("SELECT id FROM main_user WHERE name = ?", (name,))
         id = self.cur.fetchone()
@@ -551,8 +556,7 @@ async def time_with_timezone(message,id,name, *args):
     if len(arguments) > 2:
         format = time_format(mes.split(":")[1].split(" ")[1].lower())
         
-    if len(arguments) > 1:
-        
+    if len(arguments) > 1: 
         try:
             hour = int(mes.split(":")[0])
             if "PM" in name or "pm" in name:
@@ -582,7 +586,6 @@ async def random_number(message, id, name, *args):
                 num = random.randint(0,int(args[1]))
     else:
         num = random.randint(0,100)
-    
     await message.channel.send(embed=send_embed("Random", f"> {num}", 0x0000FF))
 
 
@@ -652,6 +655,22 @@ async def steam_status(message, id, name, *args):
     for i in r:
         text += "- " + scrape(i) + "\n"
     await message.channel.send(embed=send_embed("Steam Status", text, 0x0000FF))
+
+async def leaderboard(message, id, name, *args):
+    info = {}
+    users = m.list_of_users()
+    for i in users:
+        user = m.get_user(i[0])
+        money = m.get_money(user)
+        info[i[0]] = money
+    # sort the info dict
+    info = dict(sorted(info.items(), key=lambda item: item[1], reverse=True))
+    text = ""
+    for indx, user in enumerate(info):
+        text += f"{indx+1}. {user} :coin: {info[user]}\n"
+    await message.channel.send(embed=send_embed("Leaderboard", text, 0x0000FF))
+
+
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
@@ -742,6 +761,7 @@ commands = {
     '!test':test,
     '!table':table,
     '!steam_status':steam_status,
+    '!leaderboard':leaderboard,
 }
 
 @client.event
