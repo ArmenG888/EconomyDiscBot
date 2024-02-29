@@ -21,3 +21,5 @@ A economy bot for discord servers
 - ``!steam_fee <price>`` - Get the price after steam market fee
 - ``!math <equation>`` - Solve a math equation
 - ``!graph <equation>`` - Graph a math equation
+- ``!graph_ascii <equation>`` - Graph a math equation in ascii
+- ``!steam_status`` - See who is playing a game on steam checked from the urls.txt file
