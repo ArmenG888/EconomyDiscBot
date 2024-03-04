@@ -17,9 +17,11 @@ headers = {
 
 
 class main:
+    
     def __init__(self):
         self.con = sqlite3.connect("db.sqlite3")
         self.cur = self.con.cursor()
+        self.chess_board = []
     def list_of_users(self):
         self.cur.execute("SELECT name FROM main_user WHERE xp IS NOT NULL")
         users = self.cur.fetchall()
@@ -475,6 +477,22 @@ async def crime(message, id, name, *args):
     else:
         await message.channel.send(embed=send_embed("Crime", f"> You {crime_mes} and earned :coin: {money}"))
 
+async def chess(message, id, name, *args):
+    chess_game = True
+    m.chess_board = [
+        ['r','n','b','q','k','b','n','r'],
+        ['p','p','p','p','p','p','p','p'],
+        [' ',' ',' ',' ',' ',' ',' ',' '],
+        [' ',' ',' ',' ',' ',' ',' ',' '],
+        [' ',' ',' ',' ',' ',' ',' ',' '],
+        [' ',' ',' ',' ',' ',' ',' ',' '],
+        ['P','P','P','P','P','P','P','P'],
+        ['R','N','B','Q','K','B','N','R']
+    ]
+
+    await message.channel.send(embed=send_embed("Chess", f"```Starting a game with{message.content.split('!chess')[1]}```", 0x0000FF))
+    
+
 stocks = {
     'apple': 'AAPL',
     'microsoft': 'MSFT',
@@ -671,6 +689,16 @@ async def leaderboard(message, id, name, *args):
     await message.channel.send(embed=send_embed("Leaderboard", text, 0x0000FF))
 
 
+
+async def chess_move(message, id, name, *args):
+    chess_board_text = "  a b c d e f g h \n"
+    for indx,i in enumerate(m.chess_board):
+        chess_board_text += str(indx+1) + " " + " ".join(i) + " " + str(indx+1)  + "\n"
+    chess_board_text += "  a b c d e f g h "
+
+    
+    await message.channel.send(embed=send_embed("Chess", f"```{chess_board_text}```", 0x0000FF)) 
+
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
@@ -762,7 +790,11 @@ commands = {
     '!table':table,
     '!steam_status':steam_status,
     '!leaderboard':leaderboard,
+    '!chess':chess,
+    '!chess_move':chess_move,
 }
+
+chess_game = False
 
 @client.event
 async def on_ready():
@@ -782,6 +814,8 @@ levels = {
     'Level 10': '1001',
 }
 
+
+
 @client.event
 async def on_message(message):
     print(message.content)
@@ -794,14 +828,18 @@ async def on_message(message):
     await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=role))
     
     name = lambda: message.author.name
-    id = m.get_user(name()) 
-    if not message.content.startswith("!"):
-        return
-
+    id = m.get_user(name())
+    
     
     admin = True if message.author.name in admins else False # check if author admin
 
     command = message.content.split(" ")[0]
+    if message.reference and message.reference.resolved :
+        print("nuh uh")
+        await chess_move(message, id, name(), admin)
+    if not message.content.startswith("!"):
+            return
+
     if command in commands:
         try:
             await commands[command](message, id, name(), admin)
