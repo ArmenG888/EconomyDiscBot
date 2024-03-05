@@ -689,8 +689,27 @@ async def leaderboard(message, id, name, *args):
     await message.channel.send(embed=send_embed("Leaderboard", text, 0x0000FF))
 
 
+{
+    'a': 0,
+    'b': 1,
+    'c': 2,
+    'd': 3,
+    'e': 4,
+    'f': 5,
+    'g': 6,
+    'h': 7,
+}
 
 async def chess_move(message, id, name, *args):
+    # pe6,pe5
+    move = message.content
+    move = move.split(",")
+    print(move)
+    print(str(ord(move[0][1])-97))
+    print(str(8-(int(move[1][2])+1)))
+    m.chess_board[(int(move[1][2]))-1][ord(move[0][1])-97] = m.chess_board[(int(move[0][2]))-1][ord(move[0][1])-97]
+    m.chess_board[(int(move[0][2]))-1][ord(move[0][1])-97] = " "
+    
     chess_board_text = "  a b c d e f g h \n"
     for indx,i in enumerate(m.chess_board):
         chess_board_text += str(indx+1) + " " + " ".join(i) + " " + str(indx+1)  + "\n"
