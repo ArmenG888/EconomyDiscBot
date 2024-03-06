@@ -701,15 +701,33 @@ async def leaderboard(message, id, name, *args):
 }
 
 async def chess_move(message, id, name, *args):
-    # pe6,pe5
+    # pe7,pe5
     move = message.content
     move = move.split(",")
     print(move)
-    print(str(ord(move[0][1])-97))
-    print(str(8-(int(move[1][2])+1)))
-    m.chess_board[(int(move[1][2]))-1][ord(move[0][1])-97] = m.chess_board[(int(move[0][2]))-1][ord(move[0][1])-97]
-    m.chess_board[(int(move[0][2]))-1][ord(move[0][1])-97] = " "
-    
+    print(str(ord(move[0][0])-97))
+    print(str(8-(int(move[1][1])+1)))
+    piece = m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97]
+    #m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
+    #m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
+
+
+    if piece == " ":
+        await message.channel.send(embed=send_embed("Chess", f"Invalid Move\n", 0x0000FF))
+    elif piece.lower() == "p":
+        if move[0][1] == "7" or move[0][1] == "2":
+            max_move = 2
+        else:
+            max_move = 1
+        if int(move[0][1])-int(move[1][1]) <= max_move:
+            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] == " ":
+                m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
+                m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
+            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-98] != " " or m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-96] != "":
+                m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
+                m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
+        else:
+            await message.channel.send(embed=send_embed("Chess", f"Invalid Move\n", 0x0000FF)) 
     chess_board_text = "  a b c d e f g h \n"
     for indx,i in enumerate(m.chess_board):
         chess_board_text += str(indx+1) + " " + " ".join(i) + " " + str(indx+1)  + "\n"
@@ -837,7 +855,7 @@ levels = {
 
 @client.event
 async def on_message(message):
-    print(message.content)
+    print(message.author, message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
