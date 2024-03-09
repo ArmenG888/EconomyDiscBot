@@ -755,6 +755,7 @@ help_text = """
 > - ``!graph <equation>`` - Graph a math equation
 > - ``!graph_old <equation>`` - Graph a math equation in ascii
 > - ``!steam_status`` - Get the status of the steam users from the urls.txt file
+> - ``!chess <user_name>`` Start a game with a friend. 
 """
 jobs = [
     'Programmer',
