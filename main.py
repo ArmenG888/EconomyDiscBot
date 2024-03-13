@@ -720,11 +720,11 @@ async def chess_move(message, id, name, *args):
         else:
             max_move = 1
         if int(move[0][1])-int(move[1][1]) <= max_move:
-            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] == " ":
+            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] == " ": # moving forward if nothing in front. 
                 m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
                 m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
-            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-98] != " " or m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-96] != "":
-                m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
+            if m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-98] != " " or m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-96] != "":  # moving diagonally if a piece there.
+                m.chess_board[(int(move[1][1]))-1][ord(move[1][0])-97] = piece
                 m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
         else:
             await message.channel.send(embed=send_embed("Chess", f"Invalid Move\n", 0x0000FF)) 
