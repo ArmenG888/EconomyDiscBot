@@ -145,7 +145,8 @@ async def add_money(message, id, name, *args):
         await message.channel.send(embed=send_embed("Money Added", f"> {name} now has :coin: {money}"))
 
 async def bal(message, id, name, *args):
-    money = m.get_money(id)
+    name = message.content.replace("!bal ","")
+    money = m.get_money(m.get_user(name))
     mesg = f"> :coin: {money} ``Balance``\n\n**Stocks**\n"
     
     user_stocks = {}
@@ -728,6 +729,12 @@ async def chess_move(message, id, name, *args):
                 m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
         else:
             await message.channel.send(embed=send_embed("Chess", f"Invalid Move\n", 0x0000FF)) 
+    elif piece.lower()  == "r":
+        if move[0][0] == move[1][0] or move[0][1] == move[1][1]:
+            m.chess_board[(int(move[1][1]))-1][ord(move[0][0])-97] = piece
+            m.chess_board[(int(move[0][1]))-1][ord(move[0][0])-97] = " "
+        else:
+            await message.channel.send(embed=send_embed("Chess", f"Invalid Move\n", 0x0000FF))
     chess_board_text = "  a b c d e f g h \n"
     for indx,i in enumerate(m.chess_board):
         chess_board_text += str(indx+1) + " " + " ".join(i) + " " + str(indx+1)  + "\n"
