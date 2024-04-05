@@ -446,12 +446,38 @@ async def math_equation(message, id, name, *args):
 async def help(message, *args):
     await message.channel.send(embed=send_embed("Help", help_text, 0x0000FF))
     
+
+tax_keyboards = [
+    "tax fraud",
+    "tax evasion",
+    "tax avoidance",
+    "tax shelter",
+    "tax haven",
+    "no tax",
+    "tax free",
+]
 async def work(message, id, name, *args):
+    tax_rate = 0.15
+    print(message.content.split("!work"), message.content.split("!work")[1].lower())
+    if len(message.content.split("!work")) >= 1:
+        if message.content.split("!work")[1].lower()[1:] in tax_keyboards:
+            luck = random.randint(1,10)
+            if luck == 1:
+                m.add_money(id, -100)
+                await message.channel.send(embed=send_embed("Work", f"You got caught for tax evasion\n You got fined :coin: -100", 0xFF0000))
+                return
+            else:
+                tax_rate = 0.0
     job = jobs[random.randint(0,len(jobs)-1)]
     money = random.randint(1,100)
-    m.add_money(id, money)
-    await message.channel.send(embed=send_embed("Work", f"> You worked as an {job} and made :coin: {money}"))   
 
+    tax = money * tax_rate
+    net_money = money - tax
+    m.add_money(id, money)
+    if tax_rate != 0:
+        await message.channel.send(embed=send_embed("Work", f"You worked as an {job} and made :coin: {money}\nIRS took: :coin: {tax}\nNet: :coin: {net_money}"))   
+    else:
+        await message.channel.send(embed=send_embed("Work", f"You worked as an {job} and made :coin: {money}"))
 async def rob(message, id, name, *args):
     if name == message.author.name:
         await message.channel.send(embed=send_embed("Rob", "> You cannot rob yourself", 0xFF0000))
@@ -837,6 +863,7 @@ commands = {
     '!leaderboard':leaderboard,
     '!chess':chess,
     '!chess_move':chess_move,
+
 }
 
 chess_game = False
