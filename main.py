@@ -106,6 +106,13 @@ class main:
     def set_stock_price(self,id,price):
         self.cur.execute("UPDATE main_stock SET price = ? WHERE id = ?", (price,id))
         self.con.commit()
+    
+    def get_messages(self):
+        # get the last three messages and exclude the last one
+        self.cur.execute("SELECT * FROM main_message ORDER BY date DESC LIMIT 3")
+        messages = self.cur.fetchall()
+        return messages[1:]
+        
         
 
 
@@ -769,6 +776,28 @@ async def chess_move(message, id, name, *args):
     
     await message.channel.send(embed=send_embed("Chess", f"```{chess_board_text}```", 0x0000FF)) 
 
+async def nuke(message, id, name, *args):
+    past_messages = m.get_messages()
+    # count how many !nukes in last two messages
+    count = 0
+    users = []
+    for i in past_messages:
+        if "!nuke" in i[1]:
+            if i[2] in users:
+                continue
+            count += 1
+            users.append(i[2])
+    if count >= 2:
+        for i in range(1000):
+            await message.channel.send("# @everyone NUKE IS HERE")
+    elif count == 1:
+        await message.channel.send(embed=send_embed("Nuke", f"# WE NEED ONE MORE", 0xFF0000))
+        return
+    else:
+        await message.channel.send(embed=send_embed("Nuke", f"# WE NEED TWO MORE", 0xFF0000))
+        return
+
+
 help_text = """
 > - ``!bal <user (optional)>`` - Check your balance or someone else's
 > - ``!work`` - Work and earn money
@@ -863,6 +892,7 @@ commands = {
     '!leaderboard':leaderboard,
     '!chess':chess,
     '!chess_move':chess_move,
+    '!nuke':nuke,
 
 }
 
@@ -890,9 +920,10 @@ levels = {
 
 @client.event
 async def on_message(message):
-    print(message.author, message.content)
     if message.author == client.user: # if the message is from the bot then return
         return 
+    print(m.get_messages())
+    print(message.author, message.content)
     xp = m.add_message(m.get_user(message.author.name), message.content)# adds message to the db
     for i in levels:
         if xp > int(levels[i]):
