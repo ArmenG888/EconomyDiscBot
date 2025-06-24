@@ -614,6 +614,60 @@ async def leaderboard(message, id, name, *args):
         text += f"{indx+1}. {user} :coin: {info[user]}\n"
     await message.channel.send(embed=send_embed("Leaderboard", text, 0x0000FF))
 
+def haversine(lat1, lon1, lat2, lon2):
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    # Radius of Earth in kilometers (use 3958.8 for miles)
+    R = 6371.0
+    distance = R * c
+    return distance
+
+def angle(lat1, lon1, lat2, lon2):
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    return round(math.degrees(math.atan2(dlon, dlat))+180)
+
+def hot_cold(angleOfPlane, angle):
+    if angle < 90 or angle > 270:
+        if angleOfPlane > 90:
+            return "hot"
+    else:
+        return "cold"
+    
+def bogey_dope(callsign, lat1, lon1, lat2, lon2, altitude, angle_of_plane):
+    angleX = angle(lat1, lon1, lat2, lon2)
+    if angleX < 100:
+        angleX = "0" + str(angleX)
+    distance = str(round(haversine(lat1, lon1, lat2, lon2))) + "km"
+    direction = hot_cold(angle_of_plane, angle(lat1, lon1, lat2, lon2))
+    return (f"{callsign}, Terry, BRA, {angleX} for {distance}, at {altitude}, {direction}")
+
+async def bogey_dope_message(message, id, name, *args):
+    lamin=33.4300
+    lomin=-119.1460
+    lamax=34.8233
+    lomax=-117.6460
+    url = f"https://opensky-network.org/api/states/all?lamin={lamin}&lomin={lomin}&lamax={lamax}&lomax={lomax}"
+    data = requests.get(url).json()
+
+    lat2, lon2 = 34.1373969, -118.24763712 # home
+    filterByDistance = {}
+    for indx,i in enumerate(data['states']):
+        filterByDistance[indx] = (haversine(i[6], i[5], 34.1373969, -118.24763712))
+    filterByDistance = dict(sorted(filterByDistance.items(), key=lambda item: item[1]))
+    closestPlane = data['states'][list(filterByDistance.keys())[0]]
+    altitude = (str(round(closestPlane[13])) + "m")
+    angle_of_plane = closestPlane[10]
+    lat1, lon1 = closestPlane[6], closestPlane[5]# plane
+    call_sign = "Armen 1-1"
+    await message.channel.send(embed=send_embed(closestPlane[1], bogey_dope(call_sign, lat1, lon1, lat2, lon2, altitude, angle_of_plane), 0x0000FF))
 
 {
     'a': 0,
@@ -697,7 +751,7 @@ help_text = """
 > - ``!time <hour>:<minute> (optional) <format> (optional)`` - Get the time in a timezone
 > - Time formats: ``relative``, ``short``, ``long`` or ``f`` for full, ``r`` for relative, ``t`` for short
 > - EX: !time 12:00PM short, P!time short, !time 12:00PM, !time 12:00PM r
-> - ``!crime`` - Do a crime and earn money (or lose money)
+> - ``!crime`` - Do a crime and earn money (or lose money)`
 > - ``!random <min>,<max>`` - Get a random number between min and max if no arguments then get a random number between 0 and 100
 > - ``!random <max>`` - Get a random number between 0 and max
 > - ``!random yn`` - Get a random yes or no
@@ -708,8 +762,6 @@ help_text = """
 > - ``!math <equation>`` - Solve a math equation
 > - ``!graph <equation>`` - Graph a math equation
 > - ``!graph_old <equation>`` - Graph a math equation in ascii
-> - ``!steam_status`` - Get the status of the steam users from the urls.txt file
-> - ``!chess <user_name>`` Start a game with a friend. 
 """
 jobs = [
     'Programmer',
@@ -772,7 +824,6 @@ commands = {
     '!time':time_with_timezone,
     '!random':random_number,
     '!stocks':stock_market,
-    '!steam_fee':steam_market_fee,
     '!math':math_equation,
     '!buy':buy_stock,
     '!sell':sell_stock,
@@ -784,6 +835,7 @@ commands = {
     '!chess':chess,
     '!chess_move':chess_move,
     '!nuke':nuke,
+    '!bogey_dope':bogey_dope_message,
 
 }
 
@@ -818,7 +870,7 @@ async def on_message(message):
     for i in levels:
         if xp > int(levels[i]):
             role = i
-    await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=role))
+    #await message.author.add_roles(discord.utils.get(message.author.guild.roles, name=role))
     
     name = lambda: message.author.name
     id = m.get_user(name())
