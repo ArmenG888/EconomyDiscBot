@@ -46,8 +46,8 @@ async def on_message(message):
                 await asyncio.sleep(0.5)
             except Exception as e:
                 print(f"Error: {e}")
-                await message.channel.send(f"ACC session ended")
-                break
+                await asyncio.sleep(5)
+
 
         
 key = open("key.txt","r").read()
