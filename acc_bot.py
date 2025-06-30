@@ -13,16 +13,17 @@ asm = accSharedMemory()
 print(asm.read_shared_memory())
 
 def convert_time(x):
-    seconds=(x/1000)%60
+    # i want it to convert to 0:00:00.00 format
+    if x == 0:
+        return "0:00.00"
+    x = datetime.timedelta(seconds=x)
+    hours, remainder = divmod(x.total_seconds(), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    milliseconds = int((seconds - int(seconds)) * 100)
     seconds = int(seconds)
-    minutes=(x/(1000*60))%60
-    minutes = int(minutes)
-    hours=(x/(1000*60*60))%24
-    if int(hours) == 0:
-        d = datetime.time(int(hours), int(minutes), int(seconds)).strftime("%M:%S")
-    else:
-        d = datetime.time(int(hours), int(minutes), int(seconds)).strftime("%H:%M.%S")
-    return d
+    if hours == 0:
+        return f"{minutes}:{seconds:02}.{milliseconds:02}"
+    return f"{int(hours)}:{int(minutes):02}:{seconds:02}.{milliseconds:02}"
 
 @client.event
 async def on_message(message):
